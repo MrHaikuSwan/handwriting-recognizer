@@ -1,6 +1,5 @@
 import numpy as np
 import copy
-from PIL import Image
 
 def sigmoid(x, deriv = False):
     if deriv is True:
@@ -26,10 +25,7 @@ class Model(object):
     #single image input
     #TODO: implement batches into first layer (staying consistent with rest of architecture)
     def load_image(self, img):
-        if type(img) is Image.Image:
-            inlayer = np.array(img) / 255
-        elif type(img) is np.ndarray and len(img.shape) == 2:
-            inlayer = img / 255
+        inlayer = img / 255
         inlayer = inlayer.flatten()
         self.layers[0] = np.array([inlayer]).T
     
