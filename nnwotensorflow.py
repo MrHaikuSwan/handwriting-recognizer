@@ -8,10 +8,7 @@ def sigmoid(x, deriv = False):
 
 def relu(x, deriv = False):
     if deriv is True:
-        if x > 0:
-            return 1
-        else:
-            return 0
+        return int(x > 0)
     else:
         return max(0,x)
     
