@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import copy
 
 def sigmoid(x, deriv = False):
@@ -72,49 +73,43 @@ class Model(object):
         self.weights = [wm-gm for wm,gm in zip(self.weights, weight_derivs)]
         self.biases = [bm-gm for bm,gm in zip(self.biases, bias_derivs)]        
         
-    def train(self, _imgs, _labels, batch_size = 100, epochs = 1):
-        imgs = copy.copy(_imgs)
-        labels = copy.copy(_labels)
+    def train(self, _imgs, _labels, batch_size = 100, epochs = 5):
+        set_length = len(_imgs)
+        batches = set_length//batch_size
         for epoch in range(1,epochs+1):
-            print("Epoch %s: %s training examples" % (epoch, batch_size))
-            if len(imgs) < batch_size:
-                imgs += _imgs
-                labels += _labels
-            imgs_to_train = imgs[:batch_size]
-            labels_to_train = labels[:batch_size]
-            imgs = imgs[batch_size:]
-            labels = labels[batch_size:]
+            imgs = copy.copy(_imgs)
+            labels = copy.copy(_labels)
             avgcost = 0
             number_correct = 0
-            avgweights = []
-            avgbiases = []
-            number_done = 0
-            hyphens = 0
-            print('|', end='')
-            for img,label in zip(imgs_to_train,labels_to_train):
-                expected = np.zeros((10,1), dtype='uint8')
-                expected[label,0] = 1
-                self.load_image(img)
-                self.evaluate()
-                avgcost += self.cost(expected)
-                weight_derivs, bias_derivs = self.compute_gradient(expected)
-                avgweights.append(weight_derivs)
-                avgbiases.append(bias_derivs)
-                if np.argmax(self.layers[-1]) == np.argmax(expected):
-                    number_correct += 1
-                number_done += 1
-                if (10*number_done)//batch_size > hyphens:
-                    print('-', end='')
-                    hyphens += 1
-            print('|')
-            avgcost /= batch_size
-            avgweights = np.average(avgweights, axis=0)
-            avgbiases = np.average(avgbiases, axis=0)
-            self.apply_gradient((avgweights, avgbiases))
+            print("Epoch %s:" % epoch)
+            epoch_start = time.time()
+            for batch in range(batches):
+                imgs_to_train = imgs[:batch_size]
+                labels_to_train = labels[:batch_size]
+                imgs = imgs[batch_size:]
+                labels = labels[batch_size:]
+                avgweights = []
+                avgbiases = []
+                for img,label in zip(imgs_to_train,labels_to_train):
+                    expected = np.zeros((10,1), dtype='uint8')
+                    expected[label,0] = 1
+                    self.load_image(img)
+                    self.evaluate()
+                    avgcost += self.cost(expected)
+                    weight_derivs, bias_derivs = self.compute_gradient(expected)
+                    avgweights.append(weight_derivs)
+                    avgbiases.append(bias_derivs)
+                    if np.argmax(self.layers[-1]) == np.argmax(expected):
+                        number_correct += 1
+                avgweights = np.average(avgweights, axis=0)
+                avgbiases = np.average(avgbiases, axis=0)
+                self.apply_gradient((avgweights, avgbiases))
+            avgcost /= (batch_size * batches)
             print("    Average Cost: %s" % avgcost)
-            print("    Percentage Correct: %s%%" % round(100*number_correct/batch_size, 3))
+            print("    Percentage Correct: %s%%" % round(100*number_correct/(batch_size * batches), 3))
+            print("    Time Taken: %s" % (time.time()-epoch_start))
             with open('logfile.csv', 'a') as f:
-                f.write('%s,%s,%s\n' % (epoch, avgcost, round(100*number_correct/batch_size, 3)))
+                f.write('%s,%s,%s\n' % (epoch, avgcost, round(100*number_correct/(batch_size * batches), 3)))
         print("Training Complete!")
     
     def test(self, img):
