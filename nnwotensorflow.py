@@ -29,7 +29,6 @@ class Model(object):
         self.epochs_trained = 0
     
     #single image input
-    #TODO: implement batches into first layer (staying consistent with rest of architecture)
     def load_image(self, img):
         inlayer = img / 255
         inlayer = inlayer.flatten()
@@ -153,7 +152,7 @@ class Model(object):
             avgcost /= batch_size
             avgcosts.append(avgcost)
         avgcost = np.average(avgcosts)
-        percentage_correct = number_correct/(batch_size * batches)
+        percentage_correct = 100*number_correct/(batch_size * batches)
         return avgcost, percentage_correct
         
         
