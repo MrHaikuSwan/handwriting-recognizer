@@ -118,7 +118,7 @@ class Model(object):
             print("    Percentage Correct: %s%%" % round(100*number_correct/(batch_size * batches), 3))
             print("    Time Taken: %s" % (time.time()-epoch_start))
             with open('logfile.csv', 'a') as f:
-                f.write('%s,%s,%s\n' % (epoch, avgcost, round(100*number_correct/(batch_size * batches), 3)))
+                f.write('%s,%s,%s\n' % (self.epochs_trained, avgcost, round(100*number_correct/(batch_size * batches), 3)))
         print("Training Complete!")
     
     def predict(self, img):
